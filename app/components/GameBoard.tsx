@@ -33,12 +33,10 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
     const targetLetterCount: Record<string, number> = {};
     const used: boolean[] = new Array(5).fill(false);
 
-    // Count target letters
     for (const letter of targetUpper) {
       targetLetterCount[letter] = (targetLetterCount[letter] || 0) + 1;
     }
 
-    // First pass: correct positions
     for (let i = 0; i < 5; i++) {
       if (guessUpper[i] === targetUpper[i]) {
         result[i] = { letter: guessUpper[i], status: 'correct' };
@@ -47,7 +45,6 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
       }
     }
 
-    // Second pass: present but wrong position
     for (let i = 0; i < 5; i++) {
       if (result[i]) continue;
       
@@ -114,7 +111,6 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
     }
   }, [currentGuess, guesses, gameOver, targetWord, checkGuess, updateLetterStates, onGameEnd]);
 
-  // Handle physical keyboard
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameOver) return;
@@ -143,7 +139,7 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
   const currentRowIndex = guesses.length;
 
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col items-center space-y-6 pb-56">
       {/* Toast message */}
       <AnimatePresence>
         {showMessage && (

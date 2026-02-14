@@ -12,7 +12,7 @@ interface KeyboardProps {
 const KEYS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-  ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACKSPACE']
+  ['BACKSPACE', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'ENTER']
 ];
 
 export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterStates }: KeyboardProps) {
@@ -35,7 +35,7 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-2 px-2">
+    <div className="w-full max-w-2xl mx-auto space-y-2 px-2 fixed bottom-4 left-0 right-0">
       {KEYS.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
           {row.map((key) => {
@@ -55,7 +55,7 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
                   text-sm sm:text-base
                   border-2
                   transition-all duration-150
-                  ${getKeyStyle(key === 'BACKSPACE' ? 'BACKSPACE' : key)}
+                  ${getKeyStyle(key)}
                   ${key === 'ENTER' ? 'text-xs sm:text-sm' : ''}
                 `}
               >
