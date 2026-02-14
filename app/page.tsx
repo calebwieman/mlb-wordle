@@ -6,7 +6,8 @@ import { api } from '../convex/_generated/api';
 import GameBoard from './components/GameBoard';
 import Stats from './components/Stats';
 import HelpModal from './components/HelpModal';
-import { getUserId } from './ConvexClientProvider';
+import UsernameModal from './components/UsernameModal';
+import { getUserId, hasUsername, setUsername } from './ConvexClientProvider';
 
 function getToday(): string {
   return new Date().toISOString().split('T')[0];
@@ -23,6 +24,7 @@ export default function Home() {
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
   
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [gameState, setGameState] = useState({
@@ -30,6 +32,15 @@ export default function Home() {
     gameOver: false,
     won: false,
   });
+
+  // Check if first visit
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!hasUsername()) {
+        setShowUsernameModal(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (priorGame && priorGame.played && priorGame.guesses) {
@@ -45,6 +56,13 @@ export default function Home() {
     ensureDaily({ date: today });
   }, [ensureDaily, today]);
 
+  const handleUsernameSubmit = (newUsername: string) => {
+    setUsername(newUsername);
+    setShowUsernameModal(false);
+    // Reload to reinitialize Convex queries with new user
+    window.location.reload();
+  };
+
   const handleGameEnd = useCallback(async (won: boolean, guesses: string[]) => {
     setGameState({ guesses, gameOver: true, won });
     
@@ -58,6 +76,9 @@ export default function Home() {
 
   return (
     <div className="fixed inset-0 bg-zinc-950 text-white flex flex-col overflow-hidden">
+      {/* Username Modal - shown on first visit */}
+      {showUsernameModal && <UsernameModal onSubmit={handleUsernameSubmit} />}
+
       {/* Header */}
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
@@ -88,7 +109,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Game area - fills remaining space */}
+      {/* Game area */}
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {dailyPlayer && (
           <GameBoard
