@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ConvexClientProvider from "./ConvexClientProvider";
 
-const inter = Inter({ 
-  subsets: ["latin"],
-  display: 'swap',
-});
+const inter = Inter({ subsets: ["latin"], display: 'swap' });
 
 export const metadata: Metadata = {
   title: "MLB Wordle - Guess the Player",
@@ -20,15 +18,11 @@ export const viewport: Viewport = {
   themeColor: "#1e3a5f",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
-        {children}
+        <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>
   );

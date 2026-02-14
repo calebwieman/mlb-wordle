@@ -1,31 +1,28 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
 import GameBoard from './components/GameBoard';
 import Stats from './components/Stats';
 import HelpModal from './components/HelpModal';
+import { getUserId } from './ConvexClientProvider';
 
-// Daily player using date seed
-function getDailyPlayer(): string {
-  const today = new Date();
-  const dateString = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-  const players = [
-    "JUDGE", "BETTS", "TROUT", "SOTO", "ALTUV",
-    "FREEM", "MACHA", "BELLI", "NOLAN", "ACUNA",
-    "TATIS", "ALVAE", "PAULS", "GORDO", "WRIGH",
-    "MARIS", "SMITH", "YOUNG", "WALKR", "LEWIS"
-  ];
-  
-  let hash = 0;
-  for (let i = 0; i < dateString.length; i++) {
-    hash = ((hash << 5) - hash) + dateString.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return players[Math.abs(hash) % players.length];
+function getToday(): string {
+  return new Date().toISOString().split('T')[0];
 }
 
 export default function Home() {
-  const [targetWord, setTargetWord] = useState('');
+  const today = getToday();
+  const userId = typeof window !== 'undefined' ? getUserId() : '';
+  
+  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today });
+  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId });
+  const stats = useQuery(api.games.getStats, { date: today });
+  
+  const submitGame = useMutation(api.games.submitGame);
+  const ensureDaily = useMutation(api.games.ensureDailyPlayer);
+  
   const [showStats, setShowStats] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [gameState, setGameState] = useState({
@@ -35,22 +32,32 @@ export default function Home() {
   });
 
   useEffect(() => {
-    setTargetWord(getDailyPlayer());
-  }, []);
+    if (priorGame && priorGame.played && priorGame.guesses) {
+      setGameState({
+        guesses: priorGame.guesses,
+        gameOver: true,
+        won: priorGame.won,
+      });
+    }
+  }, [priorGame]);
 
-  const handleGameEnd = useCallback((won: boolean, guesses: string[]) => {
+  useEffect(() => {
+    ensureDaily({ date: today });
+  }, [ensureDaily, today]);
+
+  const handleGameEnd = useCallback(async (won: boolean, guesses: string[]) => {
     setGameState({ guesses, gameOver: true, won });
-    // Save to localStorage
-    const today = new Date().toDateString();
+    
     localStorage.setItem('mlb-wordle-last-played', today);
     localStorage.setItem('mlb-wordle-guesses', JSON.stringify(guesses));
     localStorage.setItem('mlb-wordle-won', String(won));
+    
+    await submitGame({ date: today, userId: getUserId(), guesses, won });
     setTimeout(() => setShowStats(true), 1500);
-  }, []);
+  }, [submitGame, today]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      {/* Header */}
       <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -76,11 +83,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main game */}
       <main className="px-4 py-6">
-        {targetWord && (
+        {dailyPlayer && (
           <GameBoard
-            targetWord={targetWord}
+            targetWord={dailyPlayer.playerName}
             onGameEnd={handleGameEnd}
             savedGuesses={gameState.guesses}
             savedGameOver={gameState.gameOver}
@@ -89,15 +95,14 @@ export default function Home() {
         )}
       </main>
 
-      {/* Help Modal */}
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
-      {/* Stats Modal */}
-      {showStats && (
+      {showStats && stats && (
         <Stats
           gameState={gameState}
           onClose={() => setShowStats(false)}
-          targetWord={targetWord}
+          targetWord={dailyPlayer?.playerName || ''}
+          globalStats={stats}
         />
       )}
     </div>
