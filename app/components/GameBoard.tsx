@@ -31,7 +31,6 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
     const targetUpper = targetWord.toUpperCase();
     const guessUpper = guess.toUpperCase();
     const targetLetterCount: Record<string, number> = {};
-    const used: boolean[] = new Array(5).fill(false);
 
     for (const letter of targetUpper) {
       targetLetterCount[letter] = (targetLetterCount[letter] || 0) + 1;
@@ -41,7 +40,6 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
       if (guessUpper[i] === targetUpper[i]) {
         result[i] = { letter: guessUpper[i], status: 'correct' };
         targetLetterCount[guessUpper[i]]--;
-        used[i] = true;
       }
     }
 
@@ -129,87 +127,91 @@ export default function GameBoard({ targetWord, onGameEnd, savedGuesses = [], sa
   }, [gameOver, currentGuess, guesses, handleEnter, handleBackspace, handleKeyPress]);
 
   const getTileStyle = (status?: 'correct' | 'present' | 'absent', isEmpty?: boolean) => {
-    if (isEmpty) return 'bg-zinc-900 border-zinc-700 text-zinc-500';
-    if (!status) return 'bg-zinc-900 border-zinc-600 text-white';
-    if (status === 'correct') return 'bg-emerald-600 border-emerald-600 text-white';
-    if (status === 'present') return 'bg-amber-500 border-amber-500 text-white';
-    return 'bg-zinc-700 border-zinc-700 text-white';
+    if (isEmpty) return 'bg-zinc-900/50 border-zinc-800 text-zinc-600';
+    if (!status) return 'bg-zinc-800 border-zinc-600 text-white animate-pulse-slow';
+    if (status === 'correct') return 'bg-emerald-500 border-emerald-400 text-white shadow-emerald-500/30 shadow-lg scale-105';
+    if (status === 'present') return 'bg-amber-500 border-amber-400 text-white shadow-amber-500/30 shadow-lg';
+    return 'bg-zinc-700 border-zinc-600 text-zinc-400';
   };
 
   const currentRowIndex = guesses.length;
 
   return (
-    <div className="flex flex-col items-center space-y-6 pb-56">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Toast message */}
       <AnimatePresence>
         {showMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white text-black rounded font-semibold shadow-lg"
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 bg-white text-black rounded-full font-semibold shadow-2xl text-sm"
           >
             {showMessage}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Game grid */}
-      <div className="space-y-1">
-        {[0, 1, 2, 3, 4, 5].map((row) => {
-          const isCurrentRow = row === currentRowIndex;
-          const hasResult = row < guesses.length;
-          const result = hasResult ? checkGuess(guesses[row]) : null;
-          const shouldShake = shake === row;
+      {/* Game grid - centered */}
+      <div className="flex-1 flex flex-col justify-center items-center px-4">
+        <div className="space-y-1.5">
+          {[0, 1, 2, 3, 4, 5].map((row) => {
+            const isCurrentRow = row === currentRowIndex;
+            const hasResult = row < guesses.length;
+            const result = hasResult ? checkGuess(guesses[row]) : null;
+            const shouldShake = shake === row;
 
-          return (
-            <motion.div
-              key={row}
-              animate={shouldShake ? { x: [0, -10, 10, -10, 10, 0] } : {}}
-              transition={{ duration: 0.4 }}
-              onAnimationComplete={() => setShake(null)}
-              className="flex gap-1"
-            >
-              {[0, 1, 2, 3, 4].map((col) => {
-                const letter = isCurrentRow 
-                  ? currentGuess[col] || '' 
-                  : (guesses[row]?.[col] || '');
-                const status = result?.[col]?.status;
-                const isEmpty = !letter;
-                const showFlip = hasResult && !isEmpty;
+            return (
+              <motion.div
+                key={row}
+                animate={shouldShake ? { x: [0, -12, 12, -12, 12, 0] } : {}}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+                onAnimationComplete={() => setShake(null)}
+                className="flex gap-1.5"
+              >
+                {[0, 1, 2, 3, 4].map((col) => {
+                  const letter = isCurrentRow 
+                    ? currentGuess[col] || '' 
+                    : (guesses[row]?.[col] || '');
+                  const status = result?.[col]?.status;
+                  const isEmpty = !letter;
+                  const showFlip = hasResult && !isEmpty;
 
-                return (
-                  <motion.div
-                    key={col}
-                    initial={false}
-                    animate={showFlip ? { rotateX: [0, 90, 0] } : {}}
-                    transition={{ duration: 0.3, delay: col * 0.1 }}
-                    className={`
-                      w-14 h-14 sm:w-16 sm:h-16
-                      flex items-center justify-center
-                      text-2xl sm:text-3xl font-bold uppercase
-                      border-2 rounded-sm
-                      transition-colors duration-300
-                      ${getTileStyle(status, isEmpty)}
-                      ${isEmpty ? 'border-zinc-800' : ''}
-                    `}
-                  >
-                    {letter}
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          );
-        })}
+                  return (
+                    <motion.div
+                      key={col}
+                      initial={false}
+                      animate={showFlip ? { rotateX: [0, 90, 0], scale: [1, 1.05, 1] } : {}}
+                      transition={{ duration: 0.4, delay: col * 0.08, ease: "easeOut" }}
+                      className={`
+                        w-[58px] h-[58px] sm:w-16 sm:h-16
+                        flex items-center justify-center
+                        text-3xl sm:text-4xl font-bold uppercase
+                        border-2 rounded-xl
+                        transition-all duration-300
+                        ${getTileStyle(status, isEmpty)}
+                        ${isCurrentRow && letter ? 'border-zinc-400 bg-zinc-800' : ''}
+                      `}
+                    >
+                      {letter}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Keyboard */}
-      <Keyboard
-        onKeyPress={handleKeyPress}
-        onEnter={handleEnter}
-        onBackspace={handleBackspace}
-        letterStates={letterStates}
-      />
+      {/* Keyboard - fixed at bottom */}
+      <div className="flex-shrink-0 pb-safe">
+        <Keyboard
+          onKeyPress={handleKeyPress}
+          onEnter={handleEnter}
+          onBackspace={handleBackspace}
+          letterStates={letterStates}
+        />
+      </div>
     </div>
   );
 }

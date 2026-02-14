@@ -4,13 +4,21 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
+html, body {
   height: 100%;
   background: #09090b;
   color: #fafafa;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safe area for notched phones */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
 }
 
 /* Custom scrollbar */
@@ -33,15 +41,19 @@ body {
 
 /* Animation for tile flip */
 @keyframes flip {
-  0% {
-    transform: rotateX(0deg);
-  }
-  50% {
-    transform: rotateX(90deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+/* Subtle pulse for current tile */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
 }
 
 /* Prevent text selection on tiles */
@@ -54,4 +66,14 @@ body {
 button:focus-visible {
   outline: 2px solid #10b981;
   outline-offset: 2px;
+}
+
+/* Prevent pull-to-refresh on mobile */
+body {
+  touch-action: pan-x pan-y;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }

@@ -28,35 +28,39 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
 
   const getKeyStyle = (key: string) => {
     const state = letterStates.get(key);
-    if (state === 'correct') return 'bg-emerald-600 text-white border-emerald-600';
-    if (state === 'present') return 'bg-amber-500 text-white border-amber-500';
-    if (state === 'absent') return 'bg-zinc-700 text-white border-zinc-700';
-    return 'bg-zinc-800 text-white border-zinc-600 hover:bg-zinc-700';
+    const base = 'bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 active:scale-95';
+    
+    if (state === 'correct') return 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-500/20 shadow-lg';
+    if (state === 'present') return 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20 shadow-lg';
+    if (state === 'absent') return 'bg-zinc-800 text-zinc-500 border-zinc-800';
+    return base;
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-2 px-2 fixed bottom-4 left-0 right-0">
+    <div className="w-full max-w-lg mx-auto px-2 pt-4 pb-6 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
       {KEYS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
+        <div key={rowIndex} className="flex justify-center gap-1.5 mb-1.5">
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === 'BACKSPACE';
-            const keyLabel = key === 'BACKSPACE' ? '←' : key;
+            const keyLabel = key === 'BACKSPACE' ? '←' : key === 'ENTER' ? 'ENTER' : key;
             
             return (
               <motion.button
                 key={key}
                 onClick={() => handleKeyClick(key)}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ duration: 0.05 }}
                 className={`
-                  ${isWide ? 'flex-1 px-2 sm:px-4' : 'w-8 sm:w-10'}
+                  ${isWide ? 'flex-[1.5] min-w-[60px]' : 'w-[32px] sm:w-11'}
                   h-12 sm:h-14
-                  rounded-md
+                  rounded-xl
                   font-semibold
                   text-sm sm:text-base
-                  border-2
+                  border
                   transition-all duration-150
                   ${getKeyStyle(key)}
-                  ${key === 'ENTER' ? 'text-xs sm:text-sm' : ''}
+                  ${key === 'ENTER' ? 'text-xs sm:text-sm bg-zinc-700 border-zinc-600' : ''}
+                  ${key === 'BACKSPACE' ? 'bg-zinc-700 border-zinc-600' : ''}
                 `}
               >
                 {keyLabel}
