@@ -70,12 +70,13 @@ export default function Leaderboard({
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-zinc-900/80 rounded-2xl p-6 border border-zinc-800 backdrop-blur-xl"
+        className="bg-zinc-900/90 rounded-3xl p-8 border border-zinc-700/50 backdrop-blur-xl shadow-2xl"
       >
-        <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-          {title}
+        <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-white justify-center">
+          <span className="text-3xl">🏆</span>
+          <span>{title.replace('🏆 ', '')}</span>
         </h3>
-        <p className="text-center text-zinc-500 py-6">
+        <p className="text-center text-zinc-400 py-8 text-lg">
           No winners yet today! Be the first to make the leaderboard.
         </p>
       </motion.div>
@@ -90,15 +91,16 @@ export default function Leaderboard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="bg-zinc-900/80 rounded-2xl p-5 border border-zinc-800 backdrop-blur-xl"
+      className="bg-zinc-900/90 rounded-3xl p-6 border border-zinc-700/50 backdrop-blur-xl shadow-2xl"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <span>{title}</span>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-bold flex items-center gap-3 text-white">
+          <span className="text-3xl">{title.includes('🏆') ? '🏆' : '🏆'}</span>
+          <span>{title.replace('🏆 ', '')}</span>
         </h3>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded-full">
-            {entries.length} player{entries.length !== 1 ? 's' : ''}
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-zinc-400 bg-zinc-800/60 px-3 py-1.5 rounded-full font-medium">
+            {entries.length} {entries.length === 1 ? 'player' : 'players'}
           </span>
           {collapsible && (
             <button
@@ -114,36 +116,38 @@ export default function Leaderboard({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {entries.map((entry, index) => (
           <motion.div
             key={`${entry.username}-${entry.rank}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05 }}
-            className={`flex items-center justify-between p-3 rounded-xl bg-gradient-to-r ${
+            className={`flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r ${
               entry.username === currentUsername 
                 ? getRankColor(entry.rank)
-                : 'from-zinc-800/50 to-zinc-800/30 border border-zinc-700/30'
-            } ${entry.username === currentUsername ? 'border' : ''}`}
+                : 'from-zinc-800/60 to-zinc-800/40 border border-zinc-700/40'
+            } ${entry.username === currentUsername ? 'border shadow-lg' : ''} ${
+              entry.rank === 1 ? 'shadow-yellow-500/20' : ''
+            }`}
           >
-            <div className="flex items-center gap-3">
-              <span className={`text-lg font-bold w-10 ${
-                entry.rank <= 3 ? 'text-white' : 'text-zinc-400'
+            <div className="flex items-center gap-4">
+              <span className={`text-2xl font-bold w-10 ${
+                entry.rank <= 3 ? 'drop-shadow-lg' : 'text-zinc-400'
               }`}>
                 {getRankEmoji(entry.rank)}
               </span>
-              <span className={`font-medium ${
-                entry.username === currentUsername ? 'text-white' : 'text-zinc-300'
+              <span className={`text-lg font-semibold ${
+                entry.username === currentUsername ? 'text-white' : 'text-zinc-200'
               }`}>
                 {entry.username}
                 {entry.username === currentUsername && (
-                  <span className="ml-2 text-xs text-blue-400 font-normal">(You)</span>
+                  <span className="ml-2 text-xs text-blue-400 font-medium">(You)</span>
                 )}
               </span>
             </div>
             <div className="text-right">
-              <span className={`font-bold ${
+              <span className={`text-xl font-bold ${
                 entry.guesses <= 2 ? 'text-emerald-400' :
                 entry.guesses <= 4 ? 'text-yellow-400' : 'text-orange-400'
               }`}>
