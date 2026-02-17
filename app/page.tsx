@@ -7,7 +7,9 @@ import GameBoard from './components/GameBoard';
 import Stats from './components/Stats';
 import HelpModal from './components/HelpModal';
 import UsernameModal from './components/UsernameModal';
-import { getUserId, hasUsername, setUsername } from './ConvexClientProvider';
+import Leaderboard from './components/Leaderboard';
+import MLBLogo from './components/MLBLogo';
+import { getUserId, hasUsername, setUsername, getUsername } from './ConvexClientProvider';
 
 function getToday(): string {
   return new Date().toISOString().split('T')[0];
@@ -16,24 +18,26 @@ function getToday(): string {
 export default function Home() {
   const today = getToday();
   const userId = typeof window !== 'undefined' ? getUserId() : '';
-  
+  const username = typeof window !== 'undefined' ? getUsername() : '';
+
   const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today });
   const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId });
   const stats = useQuery(api.games.getStats, { date: today });
-  
+  const leaderboard = useQuery(api.games.getLeaderboard, { date: today });
+
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
-  
+
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [gameState, setGameState] = useState({
     guesses: [] as string[],
     gameOver: false,
     won: false,
   });
 
-  // Check if first visit
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (!hasUsername()) {
@@ -59,32 +63,39 @@ export default function Home() {
   const handleUsernameSubmit = (newUsername: string) => {
     setUsername(newUsername);
     setShowUsernameModal(false);
-    // Reload to reinitialize Convex queries with new user
     window.location.reload();
   };
 
   const handleGameEnd = useCallback(async (won: boolean, guesses: string[]) => {
     setGameState({ guesses, gameOver: true, won });
-    
     localStorage.setItem('mlb-wordle-last-played', today);
     localStorage.setItem('mlb-wordle-guesses', JSON.stringify(guesses));
     localStorage.setItem('mlb-wordle-won', String(won));
-    
-    await submitGame({ date: today, userId: getUserId(), guesses, won });
+    await submitGame({
+      date: today,
+      userId: getUserId(),
+      username: getUsername(),
+      guesses,
+      won,
+    });
     setTimeout(() => setShowStats(true), 1500);
   }, [submitGame, today]);
 
+  const toggleLeaderboard = () => {
+    setShowLeaderboard(prev => !prev);
+  };
+
+  const leaderboardVisible = gameState.gameOver && leaderboard && leaderboard.length > 0;
+
   return (
     <div className="fixed inset-0 bg-zinc-950 text-white flex flex-col overflow-hidden">
-      {/* Username Modal - shown on first visit */}
       {showUsernameModal && <UsernameModal onSubmit={handleUsernameSubmit} />}
 
-      {/* Header */}
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 via-red-600 to-blue-700 flex items-center justify-center font-bold text-xs tracking-wider shadow-lg shadow-red-500/20">
-              MLB
+          <div className="flex items-center gap-3">
+            <div className="w-[72px] h-[40px] mt-1">
+              <MLBLogo />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Wordle</h1>
           </div>
@@ -109,27 +120,66 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Game area */}
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {dailyPlayer && (
-          <GameBoard
-            targetWord={dailyPlayer.playerName}
-            onGameEnd={handleGameEnd}
-            savedGuesses={gameState.guesses}
-            savedGameOver={gameState.gameOver}
-            savedWon={gameState.won}
-          />
-        )}
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0">
+          {/* Leaderboard - Only shows after game is over */}
+          {leaderboardVisible && showLeaderboard && (
+            <div className="w-full max-w-md px-4 mb-4 flex-shrink-0">
+              <Leaderboard
+                entries={leaderboard}
+                currentUsername={username}
+                title="🏆 Leaderboard"
+                onClose={() => setShowLeaderboard(false)}
+              />
+            </div>
+          )}
+
+          {/* Toggle leaderboard button */}
+          {leaderboardVisible && (
+            <div className="w-full max-w-md px-4 mb-4 flex-shrink-0">
+              <button
+                onClick={toggleLeaderboard}
+                className="w-full py-3 px-4 bg-zinc-900/80 rounded-xl border border-zinc-800 backdrop-blur-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  {showLeaderboard ? '🏆 Hide Leaderboard' : '🏆 Show Leaderboard'}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {/* "Be first" message if leaderboard is empty and game not over */}
+          {!gameState.gameOver && leaderboard && leaderboard.length === 0 && (
+            <div className="w-full max-w-md px-4 mb-4 flex-shrink-0">
+              <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800/50 text-center">
+                <p className="text-zinc-500 text-sm">
+                  🏆 Be the first to make today's leaderboard!
+                </p>
+              </div>
+            </div>
+          )}
+
+          {dailyPlayer && (
+            <GameBoard
+              targetWord={dailyPlayer.playerName}
+              onGameEnd={handleGameEnd}
+              savedGuesses={gameState.guesses}
+              savedGameOver={gameState.gameOver}
+              savedWon={gameState.won}
+            />
+          )}
+        </div>
       </main>
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
-
       {showStats && stats && (
         <Stats
           gameState={gameState}
           onClose={() => setShowStats(false)}
           targetWord={dailyPlayer?.playerName || ''}
           globalStats={stats}
+          leaderboard={leaderboard || []}
+          currentUsername={username}
         />
       )}
     </div>

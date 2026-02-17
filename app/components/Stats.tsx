@@ -1,6 +1,13 @@
 'use client';
 
 import { getUsername } from '../ConvexClientProvider';
+import ShareButton from './ShareButton';
+
+interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  guesses: number;
+}
 
 interface StatsProps {
   gameState: {
@@ -16,23 +23,37 @@ interface StatsProps {
     winRate: number;
     distribution: number[];
   };
+  leaderboard: LeaderboardEntry[];
+  currentUsername: string;
 }
 
-export default function Stats({ gameState, onClose, targetWord, globalStats }: StatsProps) {
+export default function Stats({
+  gameState,
+  onClose,
+  targetWord,
+  globalStats,
+  leaderboard,
+  currentUsername,
+}: StatsProps) {
   const { won, guesses, gameOver } = gameState;
   const { totalGames, totalWins, winRate, distribution } = globalStats;
   const username = getUsername();
-  
   const maxDist = Math.max(...distribution, 1);
+
+  const getRankEmoji = (rank: number) => {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return `#${rank}`;
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative bg-zinc-900 rounded-2xl p-6 max-w-sm w-full border border-zinc-800 max-h-[85vh] overflow-y-auto">
-        
+      <div className="relative bg-zinc-900 rounded-2xl p-6 max-w-md w-full border border-zinc-800 max-h-[90vh] overflow-y-auto">
         {/* User greeting */}
         {username && (
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
+          <div className="flex items-center gap-3 mb-5 pb-4 border-b border-zinc-800">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -40,7 +61,7 @@ export default function Stats({ gameState, onClose, targetWord, globalStats }: S
             </div>
             <div>
               <p className="text-zinc-400 text-xs">Playing as</p>
-              <p className="font-semibold">{username}</p>
+              <p className="font-semibold text-white">{username}</p>
             </div>
           </div>
         )}
@@ -48,21 +69,64 @@ export default function Stats({ gameState, onClose, targetWord, globalStats }: S
         {/* Your Result */}
         {gameOver && (
           <>
-            <h2 className="text-2xl font-bold text-center mb-4">
+            <h2 className="text-2xl font-bold text-center mb-3">
               {won ? '🎉 Home Run!' : '😞 Strike Out'}
             </h2>
-            <p className="text-center text-zinc-400 mb-4">
-              {won 
+            <p className="text-center text-zinc-400 mb-5">
+              {won
                 ? `You got it in ${guesses.length} ${guesses.length === 1 ? 'try' : 'tries'}!`
-                : `The player was ${targetWord}`
-              }
+                : `The player was ${targetWord}`}
             </p>
           </>
         )}
 
-        {/* Global Stats */}
+        {/* Leaderboard */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Today's Stats</h3>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span>🏆</span> Today's Leaderboard
+          </h3>
+          {leaderboard.length > 0 ? (
+            <div className="space-y-2">
+              {leaderboard.map((entry) => (
+                <div
+                  key={entry.rank}
+                  className={`flex items-center justify-between p-3 rounded-xl ${
+                    entry.username === currentUsername
+                      ? 'bg-blue-600/20 border border-blue-500/30'
+                      : 'bg-zinc-800/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-bold text-zinc-400 w-10">
+                      {getRankEmoji(entry.rank)}
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        entry.username === currentUsername ? 'text-white' : 'text-zinc-300'
+                      }`}
+                    >
+                      {entry.username}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-emerald-400 font-bold">{entry.guesses}</span>
+                    <span className="text-xs text-zinc-500 ml-1">
+                      {entry.guesses === 1 ? 'try' : 'tries'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-zinc-500 py-4">No winners yet today!</p>
+          )}
+        </div>
+
+        {/* Global Stats */}
+        <div className="mb-6 border-t border-zinc-800 pt-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span>📊</span> Global Stats
+          </h3>
           <div className="grid grid-cols-3 gap-3 mb-5">
             <div className="text-center p-3 bg-zinc-800/50 rounded-xl">
               <div className="text-2xl font-bold text-blue-400">{totalGames}</div>
@@ -85,7 +149,7 @@ export default function Stats({ gameState, onClose, targetWord, globalStats }: S
               <div key={num} className="flex items-center gap-2">
                 <div className="w-5 text-sm text-zinc-500 font-mono">{num}</div>
                 <div className="flex-1 h-7 bg-zinc-800/50 rounded-lg overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-emerald-500/80 rounded-lg transition-all duration-500"
                     style={{ width: `${(distribution[i] / maxDist) * 100}%` }}
                   />
@@ -97,6 +161,18 @@ export default function Stats({ gameState, onClose, targetWord, globalStats }: S
             ))}
           </div>
         </div>
+
+        {/* Share button - only show if game is over */}
+        {gameOver && (
+          <div className="mb-3">
+            <ShareButton
+              guesses={guesses}
+              won={won}
+              targetWord={targetWord}
+              guessCount={guesses.length}
+            />
+          </div>
+        )}
 
         <button
           onClick={onClose}

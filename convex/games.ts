@@ -21,17 +21,14 @@ function getDailyPlayerForDate(date: string): string {
   return MLB_PLAYERS[Math.abs(hash) % MLB_PLAYERS.length];
 }
 
-// Query just returns the word - client generates it deterministically
 export const getDailyPlayer = query({
   args: { date: v.string() },
   handler: async (ctx, { date }) => {
-    // Return deterministically calculated player
     const playerName = getDailyPlayerForDate(date);
     return { playerName };
   },
 });
 
-// Mutation ensures daily player exists in DB
 export const ensureDailyPlayer = mutation({
   args: { date: v.string() },
   handler: async (ctx, { date }) => {
@@ -83,14 +80,46 @@ export const getStats = query({
   },
 });
 
+export const getLeaderboard = query({
+  args: { date: v.optional(v.string()) },
+  handler: async (ctx, { date }) => {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    const games = await ctx.db
+      .query("playerGames")
+      .withIndex("by_date", (q) => q.eq("date", targetDate))
+      .collect();
+    
+    // Filter to only winners and sort by guess count (ascending), then by completion time
+    const winners = games
+      .filter(g => g.won && g.guessCount !== undefined)
+      .sort((a, b) => {
+        const countA = a.guessCount || 99;
+        const countB = b.guessCount || 99;
+        if (countA !== countB) {
+          return countA - countB;
+        }
+        return (a.completedAt || 0) - (b.completedAt || 0);
+      })
+      .slice(0, 10);
+    
+    return winners.map((g, idx) => ({
+      rank: idx + 1,
+      username: g.username || 'Anonymous',
+      guesses: g.guessCount || 0,
+    }));
+  },
+});
+
 export const submitGame = mutation({
   args: {
     date: v.string(),
     userId: v.string(),
+    username: v.string(),
     guesses: v.array(v.string()),
     won: v.boolean(),
   },
-  handler: async (ctx, { date, userId, guesses, won }) => {
+  handler: async (ctx, { date, userId, username, guesses, won }) => {
     const existing = await ctx.db
       .query("playerGames")
       .withIndex("by_date_user", (q) => q.eq("date", date).eq("userId", userId))
@@ -100,11 +129,15 @@ export const submitGame = mutation({
       return { alreadyPlayed: true };
     }
     
+    const guessCount = guesses.length;
+    
     await ctx.db.insert("playerGames", {
       date,
       userId,
+      username,
       guesses,
       won,
+      guessCount,
       createdAt: Date.now(),
       completedAt: Date.now(),
     });
@@ -113,8 +146,6 @@ export const submitGame = mutation({
       .query("gameStats")
       .withIndex("by_date", (q) => q.eq("date", date))
       .first();
-    
-    const guessCount = guesses.length;
     
     if (!stats) {
       const dist = [0, 0, 0, 0, 0, 0];
@@ -155,5 +186,30 @@ export const checkIfPlayed = query({
     return existing 
       ? { played: true, won: existing.won, guesses: existing.guesses } 
       : { played: false };
+  },
+});
+
+export const clearAllData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // Delete all player games
+    const playerGames = await ctx.db.query("playerGames").collect();
+    for (const game of playerGames) {
+      await ctx.db.delete(game._id);
+    }
+    
+    // Delete all game stats
+    const gameStats = await ctx.db.query("gameStats").collect();
+    for (const stat of gameStats) {
+      await ctx.db.delete(stat._id);
+    }
+    
+    // Delete all daily players
+    const dailyPlayers = await ctx.db.query("dailyPlayers").collect();
+    for (const player of dailyPlayers) {
+      await ctx.db.delete(player._id);
+    }
+    
+    return { success: true, deletedGames: playerGames.length, deletedStats: gameStats.length, deletedPlayers: dailyPlayers.length };
   },
 });
