@@ -40,15 +40,15 @@ export default function Home() {
     }
   }, []);
 
-  // Reset game when theme changes
-  useEffect(() => {
-    setGameState({ guesses: [], gameOver: false, won: false });
-  }, [currentTheme, dailyPlayer]);
-
   const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today, theme: currentTheme });
   const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId, theme: currentTheme });
   const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme });
   const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme });
+
+  // Reset game when theme changes
+  useEffect(() => {
+    setGameState({ guesses: [], gameOver: false, won: false });
+  }, [currentTheme, dailyPlayer]);
 
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
