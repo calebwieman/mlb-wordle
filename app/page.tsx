@@ -15,15 +15,40 @@ function getToday(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+const THEMES = [
+  { id: 'mlb', name: 'MLB' },
+  { id: 'sports', name: 'Sports' },
+  { id: 'foods', name: 'Foods' },
+  { id: 'animals', name: 'Animals' },
+];
+
 export default function Home() {
   const today = getToday();
   const userId = typeof window !== 'undefined' ? getUserId() : '';
   const username = typeof window !== 'undefined' ? getUsername() : '';
 
-  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today });
-  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId });
-  const stats = useQuery(api.games.getStats, { date: today });
-  const leaderboard = useQuery(api.games.getLeaderboard, { date: today });
+  // Get theme from localStorage or default to 'mlb'
+  const [currentTheme, setCurrentTheme] = useState('mlb');
+  
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('mlb-wordle-theme');
+      if (savedTheme && THEMES.some(t => t.id === savedTheme)) {
+        setCurrentTheme(savedTheme);
+      }
+    }
+  }, []);
+
+  // Reset game when theme changes
+  useEffect(() => {
+    setGameState({ guesses: [], gameOver: false, won: false });
+  }, [currentTheme]);
+
+  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today, theme: currentTheme });
+  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId, theme: currentTheme });
+  const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme });
+  const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme });
 
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
@@ -57,8 +82,8 @@ export default function Home() {
   }, [priorGame]);
 
   useEffect(() => {
-    ensureDaily({ date: today });
-  }, [ensureDaily, today]);
+    ensureDaily({ date: today, theme: currentTheme });
+  }, [ensureDaily, today, currentTheme]);
 
   const handleUsernameSubmit = (newUsername: string) => {
     setUsername(newUsername);
@@ -77,12 +102,24 @@ export default function Home() {
       username: getUsername(),
       guesses,
       won,
+      theme: currentTheme,
     });
     setTimeout(() => setShowStats(true), 1500);
   }, [submitGame, today]);
 
   const toggleLeaderboard = () => {
     setShowLeaderboard(prev => !prev);
+  };
+
+  // Cycle to next theme
+  const cycleTheme = () => {
+    const currentIndex = THEMES.findIndex(t => t.id === currentTheme);
+    const nextIndex = (currentIndex + 1) % THEMES.length;
+    const newTheme = THEMES[nextIndex].id;
+    setCurrentTheme(newTheme);
+    localStorage.setItem('mlb-wordle-theme', newTheme);
+    // Reset game state when theme changes
+    setGameState({ guesses: [], gameOver: false, won: false });
   };
 
   const leaderboardVisible = gameState.gameOver && leaderboard && leaderboard.length > 0;
@@ -99,6 +136,12 @@ export default function Home() {
             </div>
             <h1 className="text-lg font-bold tracking-tight">Wordle</h1>
           </div>
+          <button
+            onClick={cycleTheme}
+            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-300 transition-all"
+          >
+            {THEMES.find(t => t.id === currentTheme)?.name || 'MLB'}
+          </button>
           <div className="flex gap-1">
             <button
               onClick={() => setShowHelp(true)}

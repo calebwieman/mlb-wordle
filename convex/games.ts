@@ -1,65 +1,121 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-const MLB_PLAYERS = [
-  "JUDGE", "BETTS", "FREEM", "ALTUV", "SOTO",
-  "WANDO", "TROUT", "ALONS", "MARTE", "HAYES",
-  "PAULS", "WRIGH", "MULLI", "GORDO", "LINDO",
-  "MUNOZ", "BRYCE", "STANT", "MACHA", "BELLI",
-  "NOLAN", "TATIS", "ACUNA", "ALVAE", "GUERR",
-  "ROBER", "COLES", "MARIS", "SMITH", "YOUNG",
-  "WALKR", "LEWIS", "CLARK", "COXAN", "ELLIS",
-  "EVANS", "POPEZ", "PEREZ", "MORRI", "DAVIS",
-];
+const THEMES = {
+  mlb: [
+    "JUDGE", "BETTS", "FREEM", "ALTUV", "SOTO",
+    "WANDO", "TROUT", "ALONS", "MARTE", "HAYES",
+    "PAULS", "WRIGH", "MULLI", "GORDO", "LINDO",
+    "MUNOZ", "BRYCE", "STANT", "MACHA", "BELLI",
+    "NOLAN", "TATIS", "ACUNA", "ALVAE", "GUERR",
+    "ROBER", "COLES", "MARIS", "SMITH", "YOUNG",
+    "WALKR", "LEWIS", "CLARK", "COXAN", "ELLIS",
+    "EVANS", "PEREZ", "MORRI", "DAVIS", "KINGS",
+    "RINGS", "AWAYS", "HOME1", "AWAY2", "PITCH",
+    "BALLS", "STIKS", "BATS", "HELME", "CLEAT",
+    "JERSE", "SLIDE", "STEAL", "SCORE", "HITTR",
+  ],
+  sports: [
+    "GOALS", "TEAMS", "SCORE", "WINKS", "DRAWS",
+    "LEAGU", "PLAYOF", "SEASON", "TITLE", "CHAMP",
+    "MVP", "COACH", "REFER", "FOULS", "OFFSID",
+    "PENAL", "TIED", "RANK", "STATS", "RECORD",
+    "TRAIN", "FIT", "SWIM", "BIKER", "SKATE",
+    "SURF", "RUN", "JUMP", "THROW", "CATCH",
+  ],
+  foods: [
+    "PIZZA", "SUSHI", "TACOS", "BURRO", "NAAN",
+    "RICE", "PASTA", "BREAD", "CHEES", "STEAK",
+    "SALAD", "SOUP", "FRIES", "WAFFL", "PANCA",
+    "OATME", "YOGURT", "APPLES", "BANAN", "GRAPE",
+    "LEMON", "MANGO", "PEACH", "PLUM", "MELON",
+  ],
+  animals: [
+    "TIGER", "LIONS", "EAGLE", "SHARK", "WHALE",
+    "DOLPH", "HORSE", "ZEBRA", "PANDA", "KOALA",
+    "GIRAFF", "RHINO", "HIPPO", "CROCO", "SNAKE",
+    "LIZARD", "FROG", "TURTL", "WHISK", "RABBIT",
+    "SQUIR", "FOX", "WOLF", "BEAR", "DEER",
+  ],
+};
 
-function getDailyPlayerForDate(date: string): string {
+const THEME_NAMES: Record<string, string> = {
+  mlb: "MLB",
+  sports: "Sports",
+  foods: "Foods",
+  animals: "Animals",
+};
+
+const THEME_ORDER = ["mlb", "sports", "foods", "animals"];
+
+function getDailyWordForDateAndTheme(date: string, theme: string): string {
+  const words = THEMES[theme as keyof typeof THEMES] || THEMES.mlb;
   let hash = 0;
-  for (let i = 0; i < date.length; i++) {
-    hash = ((hash << 5) - hash) + date.charCodeAt(i);
+  const combined = date + theme;
+  for (let i = 0; i < combined.length; i++) {
+    hash = ((hash << 5) - hash) + combined.charCodeAt(i);
     hash = hash & hash;
   }
-  return MLB_PLAYERS[Math.abs(hash) % MLB_PLAYERS.length];
+  return words[Math.abs(hash) % words.length];
 }
 
+export const getThemes = query({
+  args: {},
+  handler: async () => {
+    return THEME_ORDER.map(theme => ({
+      id: theme,
+      name: THEME_NAMES[theme],
+    }));
+  },
+});
+
 export const getDailyPlayer = query({
-  args: { date: v.string() },
-  handler: async (ctx, { date }) => {
-    const playerName = getDailyPlayerForDate(date);
-    return { playerName };
+  args: { date: v.string(), theme: v.optional(v.string()) },
+  handler: async (ctx, { date, theme }) => {
+    const currentTheme = theme || "mlb";
+    const word = getDailyWordForDateAndTheme(date, currentTheme);
+    return { playerName: word, theme: currentTheme };
   },
 });
 
 export const ensureDailyPlayer = mutation({
-  args: { date: v.string() },
-  handler: async (ctx, { date }) => {
+  args: { date: v.string(), theme: v.optional(v.string()) },
+  handler: async (ctx, { date, theme }) => {
+    const currentTheme = theme || "mlb";
+    const themePrefix = currentTheme + "_";
+    const recordDate = themePrefix + date;
+    
     const existing = await ctx.db
       .query("dailyPlayers")
-      .withIndex("by_date", (q) => q.eq("date", date))
+      .withIndex("by_date", (q) => q.eq("date", recordDate))
       .first();
     
     if (existing) {
-      return { playerName: existing.playerName };
+      return { playerName: existing.playerName, theme: currentTheme };
     }
     
-    const playerName = getDailyPlayerForDate(date);
+    const word = getDailyWordForDateAndTheme(date, currentTheme);
     await ctx.db.insert("dailyPlayers", {
-      date,
-      playerName,
+      date: recordDate,
+      playerName: word,
       dateHash: new Date(date).getTime(),
     });
     
-    return { playerName };
+    return { playerName: word, theme: currentTheme };
   },
 });
 
 export const getStats = query({
-  args: { date: v.optional(v.string()) },
-  handler: async (ctx, { date }) => {
+  args: { date: v.optional(v.string()), theme: v.optional(v.string()) },
+  handler: async (ctx, { date, theme }) => {
     const targetDate = date || new Date().toISOString().split('T')[0];
+    const currentTheme = theme || "mlb";
+    const themePrefix = currentTheme + "_";
+    const recordDate = themePrefix + targetDate;
     
     const stats = await ctx.db
       .query("gameStats")
-      .withIndex("by_date", (q) => q.eq("date", targetDate))
+      .withIndex("by_date", (q) => q.eq("date", recordDate))
       .first();
     
     if (!stats) {
@@ -81,16 +137,18 @@ export const getStats = query({
 });
 
 export const getLeaderboard = query({
-  args: { date: v.optional(v.string()) },
-  handler: async (ctx, { date }) => {
+  args: { date: v.optional(v.string()), theme: v.optional(v.string()) },
+  handler: async (ctx, { date, theme }) => {
     const targetDate = date || new Date().toISOString().split('T')[0];
+    const currentTheme = theme || "mlb";
+    const themePrefix = currentTheme + "_";
+    const recordDate = themePrefix + targetDate;
     
     const games = await ctx.db
       .query("playerGames")
-      .withIndex("by_date", (q) => q.eq("date", targetDate))
+      .withIndex("by_date", (q) => q.eq("date", recordDate))
       .collect();
     
-    // Filter to only winners and sort by guess count (ascending), then by completion time
     const winners = games
       .filter(g => g.won && g.guessCount !== undefined)
       .sort((a, b) => {
@@ -118,11 +176,16 @@ export const submitGame = mutation({
     username: v.string(),
     guesses: v.array(v.string()),
     won: v.boolean(),
+    theme: v.optional(v.string()),
   },
-  handler: async (ctx, { date, userId, username, guesses, won }) => {
+  handler: async (ctx, { date, userId, username, guesses, won, theme }) => {
+    const currentTheme = theme || "mlb";
+    const themePrefix = currentTheme + "_";
+    const recordDate = themePrefix + date;
+    
     const existing = await ctx.db
       .query("playerGames")
-      .withIndex("by_date_user", (q) => q.eq("date", date).eq("userId", userId))
+      .withIndex("by_date_user", (q) => q.eq("date", recordDate).eq("userId", userId))
       .first();
     
     if (existing) {
@@ -132,7 +195,7 @@ export const submitGame = mutation({
     const guessCount = guesses.length;
     
     await ctx.db.insert("playerGames", {
-      date,
+      date: recordDate,
       userId,
       username,
       guesses,
@@ -144,7 +207,7 @@ export const submitGame = mutation({
     
     const stats = await ctx.db
       .query("gameStats")
-      .withIndex("by_date", (q) => q.eq("date", date))
+      .withIndex("by_date", (q) => q.eq("date", recordDate))
       .first();
     
     if (!stats) {
@@ -153,7 +216,7 @@ export const submitGame = mutation({
         dist[guessCount - 1] = 1;
       }
       await ctx.db.insert("gameStats", {
-        date,
+        date: recordDate,
         totalGames: 1,
         totalWins: won ? 1 : 0,
         distribution: dist,
@@ -176,40 +239,19 @@ export const submitGame = mutation({
 });
 
 export const checkIfPlayed = query({
-  args: { date: v.string(), userId: v.string() },
-  handler: async (ctx, { date, userId }) => {
+  args: { date: v.string(), userId: v.string(), theme: v.optional(v.string()) },
+  handler: async (ctx, { date, userId, theme }) => {
+    const currentTheme = theme || "mlb";
+    const themePrefix = currentTheme + "_";
+    const recordDate = themePrefix + date;
+    
     const existing = await ctx.db
       .query("playerGames")
-      .withIndex("by_date_user", (q) => q.eq("date", date).eq("userId", userId))
+      .withIndex("by_date_user", (q) => q.eq("date", recordDate).eq("userId", userId))
       .first();
     
     return existing 
       ? { played: true, won: existing.won, guesses: existing.guesses } 
       : { played: false };
-  },
-});
-
-export const clearAllData = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // Delete all player games
-    const playerGames = await ctx.db.query("playerGames").collect();
-    for (const game of playerGames) {
-      await ctx.db.delete(game._id);
-    }
-    
-    // Delete all game stats
-    const gameStats = await ctx.db.query("gameStats").collect();
-    for (const stat of gameStats) {
-      await ctx.db.delete(stat._id);
-    }
-    
-    // Delete all daily players
-    const dailyPlayers = await ctx.db.query("dailyPlayers").collect();
-    for (const player of dailyPlayers) {
-      await ctx.db.delete(player._id);
-    }
-    
-    return { success: true, deletedGames: playerGames.length, deletedStats: gameStats.length, deletedPlayers: dailyPlayers.length };
   },
 });
