@@ -176,7 +176,7 @@ export default function Stats({
 
         <button
           onClick={onClose}
-          className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold transition-colors"
+          className="w-full py-3.5 rounded-xl bg-zinc-700 hover:bg-zinc-600 font-semibold transition-all"
         >
           {gameOver ? 'Play Again Tomorrow' : 'Close'}
         </button>
