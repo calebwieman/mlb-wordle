@@ -59,7 +59,7 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
                 whileTap={{ scale: 0.92 }}
                 transition={{ duration: 0.05 }}
                 className={`
-                  ${isWide ? 'flex-[1.5] min-w-[60px]' : 'w-[32px] sm:w-11'}
+                  ${isWide ? 'flex-[1.25] min-w-[45px]' : 'w-[32px] sm:w-11'}
                   h-12 sm:h-14
                   rounded-xl
                   font-semibold
