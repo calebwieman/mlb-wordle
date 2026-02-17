@@ -14,9 +14,9 @@ export default function MLBLogo({ className = '' }: { className?: string }) {
           y="60"
           textAnchor="middle"
           fontFamily="Georgia, serif"
-          fontSize="60"
+          fontSize="180"
           fontWeight="bold"
-          fill="#000000"
+          fill="#FFFFFF"
         >
           MLB
         </text>
