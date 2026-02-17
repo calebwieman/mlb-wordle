@@ -43,7 +43,7 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === 'BACKSPACE';
             const keyLabel = key === 'BACKSPACE' ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex items-center justify-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H20a2 2 0 002-2V6a2 2 0 00-2-2h-9.172a2 2 0 00-1.414.586L3 12z" />
               </svg>
             ) : key === 'ENTER' ? (

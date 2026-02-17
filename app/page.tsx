@@ -45,10 +45,11 @@ export default function Home() {
     setGameState({ guesses: [], gameOver: false, won: false });
   }, [currentTheme]);
 
-  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today, theme: currentTheme });
-  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId, theme: currentTheme });
-  const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme });
-  const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme });
+  // Force refetch when theme changes by using a key
+  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today, theme: currentTheme }, { queryKey: ['dailyPlayer', currentTheme] });
+  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId, theme: currentTheme }, { queryKey: ['checkIfPlayed', currentTheme] });
+  const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme }, { queryKey: ['stats', currentTheme] });
+  const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme }, { queryKey: ['leaderboard', currentTheme] });
 
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
@@ -130,7 +131,7 @@ export default function Home() {
 
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-bold tracking-tight ml-2">Wordle</h1>
+          <h1 className="text-xl font-bold tracking-tight ml-3">Wordle</h1>
           <button
             onClick={cycleTheme}
             className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-300 transition-all"
