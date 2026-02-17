@@ -21,7 +21,7 @@ interface LeaderboardProps {
 export default function Leaderboard({ 
   entries, 
   currentUsername, 
-  title = "🏆 Leaderboard",
+  title = "Leaderboard",
   showEmptyState = true,
   collapsible = false,
   onClose
@@ -63,7 +63,7 @@ export default function Leaderboard({
         className="w-full py-3 px-4 bg-zinc-900/80 rounded-xl border border-zinc-800 backdrop-blur-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all"
       >
         <span className="flex items-center justify-center gap-2">
-          🏆 Show {title.replace('🏆 ', '')}
+          Show {title}
         </span>
       </motion.button>
     );
@@ -77,8 +77,7 @@ export default function Leaderboard({
         className="bg-zinc-900/90 rounded-3xl p-8 border border-zinc-700/50 backdrop-blur-xl shadow-2xl"
       >
         <h3 className="text-xl font-bold mb-4 flex items-center gap-3 text-white justify-center">
-          <span className="text-3xl">🏆</span>
-          <span>{title.replace('🏆 ', '')}</span>
+          <span>{title}</span>
         </h3>
         <p className="text-center text-zinc-400 py-8 text-lg">
           No winners yet today! Be the first to make the leaderboard.
@@ -99,8 +98,7 @@ export default function Leaderboard({
     >
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold flex items-center gap-3 text-white">
-          <span className="text-3xl">{title.includes('🏆') ? '🏆' : '🏆'}</span>
-          <span>{title.replace('🏆 ', '')}</span>
+          <span>{title}</span>
         </h3>
         <div className="flex items-center gap-3">
           <span className="text-sm text-zinc-400 bg-zinc-800/60 px-3 py-1.5 rounded-full font-medium">
