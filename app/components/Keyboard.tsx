@@ -74,7 +74,7 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
               >
                 {keyLabel}
               </motion.button>
-            );n          })}
+            );          })}
         </div>
       ))}
     </div>
