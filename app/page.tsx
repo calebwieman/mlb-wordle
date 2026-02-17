@@ -94,7 +94,7 @@ export default function Home() {
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-[72px] h-[40px] mt-1">
+            <div className="w-[100px] h-[50px]">
               <MLBLogo />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Wordle</h1>
