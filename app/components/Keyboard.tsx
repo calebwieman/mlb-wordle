@@ -28,7 +28,8 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
 
   const getKeyStyle = (key: string) => {
     const state = letterStates.get(key);
-    const base = 'bg-zinc-700 text-white border-zinc-600 hover:bg-zinc-600 active:scale-95';
+    const base = 'bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700 active:scale-95';
+    
     if (state === 'correct') return 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-500/20 shadow-lg';
     if (state === 'present') return 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20 shadow-lg';
     if (state === 'absent') return 'bg-zinc-800 text-zinc-500 border-zinc-800';
@@ -36,13 +37,9 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
   };
 
   return (
-    <div className="w-full max-w-screen-md mx-auto px-1 sm:px-2 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent pt-2">
+    <div className="w-full max-w-lg mx-auto px-2 pt-4 pb-6 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
       {KEYS.map((row, rowIndex) => (
-        <div
-          key={rowIndex}
-          className="flex justify-center"
-          style={{ marginBottom: rowIndex < KEYS.length - 1 ? '6px' : '0' }}
-        >
+        <div key={rowIndex} className="flex justify-center gap-1.5 mb-1.5">
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === 'BACKSPACE';
             const keyLabel = key === 'BACKSPACE' ? (
@@ -52,29 +49,30 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
             ) : key === 'ENTER' ? (
               <span className="text-[10px] sm:text-xs font-bold">ENTER</span>
             ) : key;
-
+            
             return (
               <motion.button
                 key={key}
                 onClick={() => handleKeyClick(key)}
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.92 }}
                 transition={{ duration: 0.05 }}
                 className={`
-                  ${isWide ? 'flex-[1.5] min-w-[42px] max-w-[65px]' : 'w-[28px] flex-1 max-w-[40px]'}
-                  h-11 sm:h-12 sm:w-10 sm:max-w-none
-                  mx-[3px] first:ml-0 last:mr-0
-                  rounded-lg sm:rounded-xl 
-                  font-semibold text-[13px] sm:text-[15px]
-                  border transition-all duration-150
-                  flex items-center justify-center
-                  touch-manipulation
+                  ${isWide ? 'flex-[1.5] min-w-[60px]' : 'w-[32px] sm:w-11'}
+                  h-12 sm:h-14
+                  rounded-xl
+                  font-semibold
+                  text-sm sm:text-base
+                  border
+                  transition-all duration-150
                   ${getKeyStyle(key)}
-                  ${key === 'ENTER' || key === 'BACKSPACE' ? 'bg-zinc-700 border-zinc-600' : ''}
+                  ${key === 'ENTER' ? 'text-xs sm:text-sm bg-zinc-700 border-zinc-600' : ''}
+                  ${key === 'BACKSPACE' ? 'bg-zinc-700 border-zinc-600' : ''}
                 `}
               >
                 {keyLabel}
               </motion.button>
-            );          })}
+            );
+          })}
         </div>
       ))}
     </div>
