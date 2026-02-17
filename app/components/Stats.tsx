@@ -70,12 +70,12 @@ export default function Stats({
         {gameOver && (
           <>
             <h2 className="text-2xl font-bold text-center mb-3">
-              {won ? '🎉 Home Run!' : '😞 Strike Out'}
+              {won ? '🎉 You Won!' : '😞 Game Over'}
             </h2>
             <p className="text-center text-zinc-400 mb-5">
               {won
                 ? `You got it in ${guesses.length} ${guesses.length === 1 ? 'try' : 'tries'}!`
-                : `The player was ${targetWord}`}
+                : `The word was ${targetWord}`}
             </p>
           </>
         )}
