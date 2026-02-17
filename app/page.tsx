@@ -46,7 +46,8 @@ export default function Home() {
   const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme });
 
   // Check if queries are still loading
-  const isLoading = dailyPlayer === undefined;
+  // Loading is true while dailyPlayer OR leaderboard is loading
+  const isLoading = dailyPlayer === undefined || leaderboard === undefined;
 
   // Reset game when theme changes
   useEffect(() => {
