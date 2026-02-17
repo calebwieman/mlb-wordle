@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { getUsername } from '../ConvexClientProvider';
 import ShareButton from './ShareButton';
 
@@ -35,7 +36,27 @@ export default function Stats({
   leaderboard,
   currentUsername,
 }: StatsProps) {
-  const { won, guesses, gameOver } = gameState;
+  const { won: gameStateWon, guesses: gameStateGuesses, gameOver } = gameState;
+  
+  // Check localStorage for guesses if not in gameState
+  const [localGuesses, setLocalGuesses] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('mlb-wordle-guesses');
+      if (saved) {
+        try {
+          setLocalGuesses(JSON.parse(saved));
+        } catch (e) {
+          // ignore parse errors
+        }
+      }
+    }
+  }, []);
+  
+  const guesses = gameStateGuesses.length > 0 ? gameStateGuesses : localGuesses;
+  const won = gameStateWon || localStorage.getItem('mlb-wordle-won') === 'true';
+  
   const { totalGames, totalWins, winRate, distribution } = globalStats;
   const username = getUsername();
   const maxDist = Math.max(...distribution, 1);
