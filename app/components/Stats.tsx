@@ -170,8 +170,8 @@ export default function Stats({
           </div>
         </div>
 
-        {/* Share button - only show if game is over */}
-        {gameOver && (
+        {/* Share button - show if there are guesses (game was played) */}
+        {(gameOver || guesses.length > 0) && (
           <div className="mb-3">
             <ShareButton
               guesses={guesses}
