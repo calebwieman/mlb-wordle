@@ -211,7 +211,7 @@ export default function Home() {
           )}
 
           {/* "Be first" message if leaderboard is empty and game not over */}
-          {!gameState.gameOver && leaderboard && leaderboard.length === 0 && (
+          {!gameState.gameOver && (!leaderboard || leaderboard.length === 0) && (
             <div className="w-full max-w-md px-4 mb-4 flex-shrink-0">
               <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800/50 text-center">
                 <p className="text-zinc-500 text-sm">

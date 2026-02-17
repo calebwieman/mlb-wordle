@@ -48,9 +48,9 @@ export default function Stats({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="relative bg-zinc-900 rounded-2xl p-6 max-w-md w-full border border-zinc-800 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-zinc-900 rounded-2xl p-4 sm:p-6 max-w-sm w-full border border-zinc-800 max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* User greeting */}
         {username && (
           <div className="flex items-center gap-3 mb-5 pb-4 border-b border-zinc-800">

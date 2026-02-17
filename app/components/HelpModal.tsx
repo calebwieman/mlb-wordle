@@ -6,15 +6,15 @@ interface HelpModalProps {
 
 export default function HelpModal({ onClose }: HelpModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-zinc-900 rounded-xl p-6 max-w-sm w-full border border-zinc-800 max-h-[80vh] overflow-y-auto">
+      <div className="relative bg-zinc-900 rounded-xl p-5 max-w-xs w-full border border-zinc-800 max-h-[80vh] overflow-y-auto shadow-2xl">
         <h2 className="text-2xl font-bold mb-4">How to Play</h2>
-        <p className="text-zinc-400 mb-4">Guess the 5-letter MLB player last name in 6 tries.</p>
+        <p className="text-zinc-400 mb-4">Guess the 5-letter word in 6 tries.</p>
         
         <div className="space-y-3 mb-4">
           <div className="flex gap-2">
-            {['J', 'U', 'D', 'G', 'E'].map((l, i) => (
+            {['W', 'O', 'R', 'D', 'S'].map((l, i) => (
               <div key={i} className={`w-10 h-10 flex items-center justify-center font-bold rounded ${
                 i === 0 ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-zinc-400'
               }`}>
@@ -22,10 +22,10 @@ export default function HelpModal({ onClose }: HelpModalProps) {
               </div>
             ))}
           </div>
-          <p className="text-sm text-zinc-400">J is in the correct spot</p>
+          <p className="text-sm text-zinc-400">W is in the correct spot</p>
 
           <div className="flex gap-2">
-            {['T', 'R', 'O', 'U', 'T'].map((l, i) => (
+            {['P', 'I', 'Z', 'Z', 'A'].map((l, i) => (
               <div key={i} className={`w-10 h-10 flex items-center justify-center font-bold rounded ${
                 i === 2 ? 'bg-amber-500 text-white' : 'bg-zinc-800 text-zinc-400'
               }`}>
