@@ -141,21 +141,48 @@ export default function Home() {
       {showUsernameModal && <UsernameModal onSubmit={handleUsernameSubmit} />}
 
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between md:justify-between relative">
-          {/* Theme cycle button - absolute left on mobile, left on desktop */}
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between md:justify-start md:gap-4">
+          {/* Theme cycle button - left on mobile */}
           <button
             onClick={cycleTheme}
-            className="absolute left-0 md:relative px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm font-semibold text-zinc-300 transition-all"
+            className="md:hidden px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm font-semibold text-zinc-300 transition-all"
             style={{ minWidth: '90px' }}
           >
             {THEMES.find(t => t.id === currentTheme)?.name || 'MLB'}
           </button>
 
-          {/* Wordle title - centered */}
-          <h1 className="text-2xl font-bold tracking-tight">Wordle</h1>
+          {/* Desktop: theme button, spacer, title, spacer, buttons - centered */}
+          <div className="hidden md:flex items-center justify-center gap-8 w-full">
+            <button
+              onClick={cycleTheme}
+              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm font-semibold text-zinc-300 transition-all"
+              style={{ minWidth: '90px' }}
+            >
+              {THEMES.find(t => t.id === currentTheme)?.name || 'MLB'}
+            </button>
+            <h1 className="text-2xl font-bold tracking-tight">Wordle</h1>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setShowHelp(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowStats(true)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
-          {/* Buttons - absolute right on mobile, right on desktop */}
-          <div className="absolute right-0 md:relative flex gap-1">
+          {/* Mobile: buttons on right */}
+          <div className="md:hidden flex gap-1">
             <button
               onClick={() => setShowHelp(true)}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
