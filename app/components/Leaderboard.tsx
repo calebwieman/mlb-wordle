@@ -28,18 +28,22 @@ export default function Leaderboard({
 }: LeaderboardProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const getRankEmoji = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
+  const getRankColor = (rank: number) => {
+    if (rank === 1) return 'from-emerald-500/20 to-emerald-600/20 border-emerald-500/30';
+    if (rank === 2) return 'from-yellow-500/20 to-amber-500/20 border-yellow-500/30';
+    if (rank === 3) return 'from-amber-500/20 to-orange-500/20 border-amber-500/30';
+    return 'from-emerald-500/10 to-emerald-600/10 border-emerald-500/20';
+  };
+
+  const getRankText = (rank: number) => {
     return `#${rank}`;
   };
 
-  const getRankColor = (rank: number) => {
-    if (rank === 1) return 'from-yellow-500/20 to-amber-600/20 border-yellow-500/30';
-    if (rank === 2) return 'from-gray-400/20 to-gray-500/20 border-gray-400/30';
-    if (rank === 3) return 'from-orange-400/20 to-orange-600/20 border-orange-500/30';
-    return 'from-blue-600/20 to-blue-700/20 border-blue-500/30';
+  const getRankNumberColor = (rank: number) => {
+    if (rank === 1) return 'text-emerald-400';
+    if (rank === 2) return 'text-yellow-400';
+    if (rank === 3) return 'text-amber-400';
+    return 'text-zinc-500';
   };
 
   const handleClose = () => {
@@ -132,17 +136,19 @@ export default function Leaderboard({
             }`}
           >
             <div className="flex items-center gap-4">
-              <span className={`text-2xl font-bold w-10 ${
-                entry.rank <= 3 ? 'drop-shadow-lg' : 'text-zinc-400'
+              <span className={`text-lg font-bold w-8 ${
+                entry.rank === 1 ? 'text-emerald-400' :
+                entry.rank === 2 ? 'text-yellow-400' :
+                entry.rank === 3 ? 'text-amber-400' : 'text-zinc-500'
               }`}>
-                {getRankEmoji(entry.rank)}
+                {getRankText(entry.rank)}
               </span>
               <span className={`text-lg font-semibold ${
                 entry.username === currentUsername ? 'text-white' : 'text-zinc-200'
               }`}>
                 {entry.username}
                 {entry.username === currentUsername && (
-                  <span className="ml-2 text-xs text-blue-400 font-medium">(You)</span>
+                  <span className="ml-2 text-xs text-emerald-400 font-medium">(You)</span>
                 )}
               </span>
             </div>
