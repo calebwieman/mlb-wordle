@@ -134,7 +134,7 @@ export default function Home() {
             <div className="w-[100px] h-[50px]">
               <MLBLogo />
             </div>
-            <h1 className="text-lg font-bold tracking-tight">Wordle</h1>
+            <h1 className="text-lg font-bold tracking-tight">{THEMES.find(t => t.id === currentTheme)?.name || 'MLB'} Wordle</h1>
           </div>
           <button
             onClick={cycleTheme}
