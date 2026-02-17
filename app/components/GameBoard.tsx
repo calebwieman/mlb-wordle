@@ -146,7 +146,7 @@ export default function GameBoard({
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-50 font-bold text-white text-lg tracking-wide drop-shadow-lg"
+            className="fixed top-14 left-1/2 -translate-x-1/2 z-50 font-bold text-white text-lg tracking-wide drop-shadow-lg"
           >
             {showMessage}
           </motion.div>

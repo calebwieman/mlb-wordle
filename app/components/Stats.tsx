@@ -40,11 +40,15 @@ export default function Stats({
   const username = getUsername();
   const maxDist = Math.max(...distribution, 1);
 
-  const getRankEmoji = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
+  const getRankText = (rank: number) => {
     return `#${rank}`;
+  };
+
+  const getRankColor = (rank: number) => {
+    if (rank === 1) return 'from-emerald-500/20 to-emerald-600/20 border-emerald-500/30';
+    if (rank === 2) return 'from-yellow-500/20 to-amber-500/20 border-yellow-500/30';
+    if (rank === 3) return 'from-amber-500/20 to-orange-500/20 border-amber-500/30';
+    return 'from-emerald-500/10 to-emerald-600/10 border-emerald-500/20';
   };
 
   return (
@@ -54,7 +58,7 @@ export default function Stats({
         {/* User greeting */}
         {username && (
           <div className="flex items-center gap-3 mb-5 pb-4 border-b border-zinc-800">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
