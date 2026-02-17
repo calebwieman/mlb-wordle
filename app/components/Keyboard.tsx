@@ -39,7 +39,7 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
   return (
     <div className="w-full max-w-lg mx-auto px-2 pt-4 pb-6 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
       {KEYS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-1.5 mb-3">
+        <div key={rowIndex} className="flex justify-center gap-2 mb-4">
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === 'BACKSPACE';
             const keyLabel = key === 'BACKSPACE' ? (
