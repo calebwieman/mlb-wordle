@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import GameBoard from './components/GameBoard';
@@ -56,6 +56,9 @@ export default function Home() {
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
 
+  // Track if we've initialized today's game to prevent duplicate calls
+  const todayRef = useRef<string>('');
+
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -85,7 +88,12 @@ export default function Home() {
   }, [priorGame]);
 
   useEffect(() => {
-    ensureDaily({ date: today, theme: currentTheme });
+    // Only call ensureDaily once per day+theme combination
+    const key = `${today}-${currentTheme}`;
+    if (todayRef.current !== key) {
+      todayRef.current = key;
+      ensureDaily({ date: today, theme: currentTheme });
+    }
   }, [ensureDaily, today, currentTheme]);
 
   const handleUsernameSubmit = (newUsername: string) => {
