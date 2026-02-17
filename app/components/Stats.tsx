@@ -87,22 +87,26 @@ export default function Stats({
         {/* Leaderboard */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <span>🏆</span> Today's Leaderboard
+            <span className="text-emerald-400">Leaderboard</span>
           </h3>
           {leaderboard.length > 0 ? (
             <div className="space-y-2">
               {leaderboard.map((entry) => (
                 <div
                   key={entry.rank}
-                  className={`flex items-center justify-between p-3 rounded-xl ${
+                  className={`flex items-center justify-between p-3 rounded-xl bg-gradient-to-r ${
                     entry.username === currentUsername
-                      ? 'bg-blue-600/20 border border-blue-500/30'
-                      : 'bg-zinc-800/50'
-                  }`}
+                      ? getRankColor(entry.rank)
+                      : 'from-zinc-800/50 to-zinc-800/30 border border-zinc-700/30'
+                  } ${entry.username === currentUsername ? 'border' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg font-bold text-zinc-400 w-10">
-                      {getRankEmoji(entry.rank)}
+                    <span className={`text-lg font-bold w-10 ${
+                      entry.rank === 1 ? 'text-emerald-400' :
+                      entry.rank === 2 ? 'text-yellow-400' :
+                      entry.rank === 3 ? 'text-amber-400' : 'text-zinc-500'
+                    }`}>
+                      {getRankText(entry.rank)}
                     </span>
                     <span
                       className={`font-medium ${
@@ -133,7 +137,7 @@ export default function Stats({
           </h3>
           <div className="grid grid-cols-3 gap-3 mb-5">
             <div className="text-center p-3 bg-zinc-800/50 rounded-xl">
-              <div className="text-2xl font-bold text-blue-400">{totalGames}</div>
+              <div className="text-2xl font-bold text-emerald-400">{totalGames}</div>
               <div className="text-xs text-zinc-500">Games</div>
             </div>
             <div className="text-center p-3 bg-zinc-800/50 rounded-xl">
