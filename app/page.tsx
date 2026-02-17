@@ -43,13 +43,12 @@ export default function Home() {
   // Reset game when theme changes
   useEffect(() => {
     setGameState({ guesses: [], gameOver: false, won: false });
-  }, [currentTheme]);
+  }, [currentTheme, dailyPlayer]);
 
-  // Force refetch when theme changes by using a key
-  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today, theme: currentTheme }, { queryKey: ['dailyPlayer', currentTheme] });
-  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId, theme: currentTheme }, { queryKey: ['checkIfPlayed', currentTheme] });
-  const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme }, { queryKey: ['stats', currentTheme] });
-  const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme }, { queryKey: ['leaderboard', currentTheme] });
+  const dailyPlayer = useQuery(api.games.getDailyPlayer, { date: today, theme: currentTheme });
+  const priorGame = useQuery(api.games.checkIfPlayed, { date: today, userId, theme: currentTheme });
+  const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme });
+  const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme });
 
   const submitGame = useMutation(api.games.submitGame);
   const ensureDaily = useMutation(api.games.ensureDailyPlayer);
