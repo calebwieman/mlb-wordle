@@ -141,7 +141,7 @@ export default function Home() {
       {showUsernameModal && <UsernameModal onSubmit={handleUsernameSubmit} />}
 
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between md:justify-start md:gap-4">
+        <div className="max-w-lg md:max-w-2xl mx-auto px-4 py-3 flex items-center justify-between md:justify-start md:gap-4">
           {/* Theme cycle button - left on mobile */}
           <button
             onClick={cycleTheme}
