@@ -142,10 +142,10 @@ export default function Home() {
 
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between md:justify-center relative">
-          {/* Theme cycle button - left side on desktop, left on mobile */}
+          {/* Theme cycle button - left on mobile, absolute left on desktop */}
           <button
             onClick={cycleTheme}
-            className="absolute left-0 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm font-semibold text-zinc-300 transition-all"
+            className="md:absolute md:left-0 px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm font-semibold text-zinc-300 transition-all"
             style={{ minWidth: '90px' }}
           >
             {THEMES.find(t => t.id === currentTheme)?.name || 'MLB'}
@@ -155,7 +155,7 @@ export default function Home() {
           <h1 className="text-2xl font-bold tracking-tight">Wordle</h1>
 
           {/* Buttons - right side */}
-          <div className="flex gap-1 absolute right-0">
+          <div className="flex gap-1">
             <button
               onClick={() => setShowHelp(true)}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
