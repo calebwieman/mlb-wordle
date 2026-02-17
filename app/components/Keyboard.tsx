@@ -39,13 +39,15 @@ export default function Keyboard({ onKeyPress, onEnter, onBackspace, letterState
   return (
     <div className="w-full max-w-lg mx-auto px-2 pt-4 pb-6 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
       {KEYS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-1.5 mb-2">
+        <div key={rowIndex} className="flex justify-center gap-1.5 mb-3">
           {row.map((key) => {
             const isWide = key === 'ENTER' || key === 'BACKSPACE';
             const keyLabel = key === 'BACKSPACE' ? (
-              <svg className="w-5 h-5 flex items-center justify-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H20a2 2 0 002-2V6a2 2 0 00-2-2h-9.172a2 2 0 00-1.414.586L3 12z" />
-              </svg>
+              <div className="flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H20a2 2 0 002-2V6a2 2 0 00-2-2h-9.172a2 2 0 00-1.414.586L3 12z" />
+                </svg>
+              </div>
             ) : key === 'ENTER' ? (
               <span className="text-[10px] sm:text-xs font-bold">ENTER</span>
             ) : key;

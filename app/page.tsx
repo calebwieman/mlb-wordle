@@ -45,6 +45,9 @@ export default function Home() {
   const stats = useQuery(api.games.getStats, { date: today, theme: currentTheme });
   const leaderboard = useQuery(api.games.getLeaderboard, { date: today, theme: currentTheme });
 
+  // Check if queries are still loading
+  const isLoading = dailyPlayer === undefined;
+
   // Reset game when theme changes
   useEffect(() => {
     setGameState({ guesses: [], gameOver: false, won: false });
@@ -130,7 +133,7 @@ export default function Home() {
 
       <header className="flex-shrink-0 border-b border-zinc-800/50 bg-zinc-900/80 backdrop-blur-xl">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight ml-3">Wordle</h1>
+          <h1 className="text-2xl font-bold tracking-tight ml-8">Wordle</h1>
           <button
             onClick={cycleTheme}
             className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-300 transition-all"
@@ -197,7 +200,29 @@ export default function Home() {
             </div>
           )}
 
-          {dailyPlayer && (
+          {/* Loading spinner */}
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-10 h-10 border-4 border-zinc-700 border-t-emerald-500 rounded-full animate-spin"></div>
+              <p className="mt-4 text-zinc-500 text-sm">Loading game...</p>
+            </div>
+          )}
+
+          {/* Error state */}
+          {!isLoading && !dailyPlayer && (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <p className="text-zinc-400 text-center mb-4">Unable to load today's game</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-all"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Game board */}
+          {!isLoading && dailyPlayer && (
             <GameBoard
               targetWord={dailyPlayer.playerName}
               onGameEnd={handleGameEnd}
