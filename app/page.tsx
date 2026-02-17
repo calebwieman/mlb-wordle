@@ -176,7 +176,7 @@ export default function Home() {
       </header>
 
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="flex-1 flex flex-col items-center justify-center min-h-0">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0 pt-4">
           {/* Leaderboard - Only shows after game is over */}
           {leaderboardVisible && showLeaderboard && (
             <div className="w-full max-w-md px-4 mb-4 flex-shrink-0">
